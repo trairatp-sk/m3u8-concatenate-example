@@ -2,11 +2,14 @@ lockfileVersion: 5.4
 
 specifiers:
   '@next/font': 13.1.6
+  '@types/hls-parser': ^0.8.3
   '@types/node': 18.13.0
   '@types/react': 18.0.27
   '@types/react-dom': 18.0.10
   eslint: 8.33.0
   eslint-config-next: 13.1.6
+  hls-parser: ^0.10.6
+  hls.js: ^1.3.3
   next: 13.1.6
   react: 18.2.0
   react-dom: 18.2.0
@@ -14,11 +17,14 @@ specifiers:
 
 dependencies:
   '@next/font': 13.1.6
+  '@types/hls-parser': 0.8.3
   '@types/node': 18.13.0
   '@types/react': 18.0.27
   '@types/react-dom': 18.0.10
   eslint: 8.33.0
   eslint-config-next: 13.1.6_4vsywjlpuriuw3tl5oq6zy5a64
+  hls-parser: 0.10.6
+  hls.js: 1.3.3
   next: 13.1.6_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -242,6 +248,12 @@ packages:
     resolution: {integrity: sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==}
     dependencies:
       tslib: 2.5.0
+    dev: false
+
+  /@types/hls-parser/0.8.3:
+    resolution: {integrity: sha512-dGDgo+gN1wLJU3lClOeUlaGLtzI6Nu1+MtXjxh6+wAIyaWlpSSzihw12MDd2yIkN2pDhBci5fDrdfT2/hyGGGg==}
+    dependencies:
+      '@types/node': 18.13.0
     dev: false
 
   /@types/json5/0.0.29:
@@ -1230,6 +1242,14 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: 1.1.1
+    dev: false
+
+  /hls-parser/0.10.6:
+    resolution: {integrity: sha512-t9bKB1fDDVajh5CY/qeZanNMnCm4hAWMroDlflnuboOskYR26z29bEyOYwQRP1MxP2Y83UC2J93DQCC1AMhBCA==}
+    dev: false
+
+  /hls.js/1.3.3:
+    resolution: {integrity: sha512-4Efu6g90HfFGDuQrkquhDoRpA/4iVpSMcfK9zguJ2qXEUfo5VknZt6rziwwFPHmC2DU3crZ0NtPD0eUqOhFyqg==}
     dev: false
 
   /ignore/5.2.4:
