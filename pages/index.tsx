@@ -3,12 +3,23 @@ import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import styles from '@/styles/Home.module.css'
 import VideoPlayer from '@/components/VideoPlayer'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   // const [src, setSrc] = useState('/vids/new');
+  const router = useRouter();
+  const query = router.query;
+  const seq = query.seq;
+
+  useEffect(() => {
+    if (typeof seq === 'string') {
+      setSrc(`/api/gen-manifest?seq=${seq}`);
+    }
+  }, [seq]);
+
   const [src, setSrc] = useState('/api/gen-manifest');
   return (
     <>

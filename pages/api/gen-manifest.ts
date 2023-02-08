@@ -37,7 +37,11 @@ https://m3u8-concatenate-example.vercel.app/vids/vid-03/vid-030.ts
 #EXT-X-ENDLIST
 `
   ]);
-  const seq = [1, 2, 1, 2, 0];
+  const { seq: querySeq } = req.query;
+  let seq = [1, 2, 1, 2, 0];
+  if (typeof querySeq === 'string') {
+    seq = querySeq.split('').map((i) => +i);
+  }
   const manifests = rawManifests.map((rm) => HLS.parse(rm));
   console.log(manifests);
   const { MediaPlaylist, Segment } = HLS.types;
