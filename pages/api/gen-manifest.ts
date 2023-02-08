@@ -12,9 +12,30 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const rawManifests = await Promise.all([
-    fs.readFile("public/vids/vid-01/vid-01.m3u8", "utf-8"),
-    fs.readFile("public/vids/vid-02/vid-02.m3u8", "utf-8"),
-    fs.readFile("public/vids/vid-03/vid-03.m3u8", "utf-8"),
+`#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:6.473133,
+https://m3u8-concatenate-example.vercel.app/vids/vid-01/vid-010.ts
+#EXT-X-ENDLIST
+`,
+`#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:2
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:2.333333,
+https://m3u8-concatenate-example.vercel.app/vids/vid-02/vid-020.ts
+#EXT-X-ENDLIST
+`,
+`#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:5.600000,
+https://m3u8-concatenate-example.vercel.app/vids/vid-03/vid-030.ts
+#EXT-X-ENDLIST
+`
   ]);
   const seq = [1, 2, 1, 2, 0];
   const manifests = rawManifests.map((rm) => HLS.parse(rm));
