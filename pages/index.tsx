@@ -1,26 +1,41 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
-import VideoPlayer from '@/components/VideoPlayer'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
+import Head from "next/head";
+import Image from "next/image";
+import { Inter } from "@next/font/google";
+import styles from "@/styles/Home.module.css";
+import VideoPlayer from "@/components/VideoPlayer";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [manifest, setManifest] = useState("");
   // const [src, setSrc] = useState('/vids/new');
   const router = useRouter();
   const query = router.query;
   const seq = query.seq;
 
+  const [src, setSrc] = useState("/api/gen-manifest");
+
+  const onChange = (newValue: string) => {
+    const validatedValue = newValue
+      .split("")
+      .filter((s) => [0, 1, 2].includes(+s))
+      .join("");
+  };
+
   useEffect(() => {
-    if (typeof seq === 'string') {
-      setSrc(`/api/gen-manifest?seq=${seq}`);
+    const newSrc = `/api/gen-manifest?seq=${seq}`;
+    if (typeof seq === "string") {
+      setSrc(newSrc);
+      const src = fetch(newSrc).then((value) =>
+        value.text().then((manifest) => {
+          console.log(manifest);
+          setManifest(manifest);
+        })
+      );
     }
   }, [seq]);
-
-  const [src, setSrc] = useState('/api/gen-manifest');
   return (
     <>
       <Head>
@@ -31,7 +46,11 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <VideoPlayer src={src}></VideoPlayer>
+        <div className={styles.manifestpreview}>
+          <h2>m3u8 preview</h2>
+          <code>{manifest}</code>
+        </div>
       </main>
     </>
-  )
+  );
 }

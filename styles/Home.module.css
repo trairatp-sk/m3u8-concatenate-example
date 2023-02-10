@@ -1,8 +1,8 @@
 .main {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   padding: 6rem;
   min-height: 100vh;
 }
@@ -97,7 +97,7 @@
 
 .center::before,
 .center::after {
-  content: '';
+  content: "";
   left: 50%;
   position: absolute;
   filter: blur(45px);
@@ -125,7 +125,7 @@
 
 .thirteen::before,
 .thirteen::after {
-  content: '';
+  content: "";
   position: absolute;
   z-index: -1;
 }
@@ -275,4 +275,14 @@
   to {
     transform: rotate(0deg);
   }
+}
+
+.manifestpreview {
+  overflow: scroll;
+  white-space: pre-wrap;
+  padding: 8px;
+}
+
+.manifestpreview code {
+  overflow: scroll;
 }
