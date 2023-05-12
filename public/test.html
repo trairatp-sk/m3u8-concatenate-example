@@ -3,56 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Video Pause and Question</title>
+    <title>Video with Custom Overlay</title>
     <style>
-      #video-container {
+      .video-wrapper {
         position: relative;
+        display: inline-block;
       }
 
-      #question-overlay {
+      .overlay {
         position: absolute;
-        width: 100%;
-        height: 100%;
+        /* top: 0; */
+        left: 10%;
+        right: 10%;
+        bottom: 0;
         background-color: rgba(0, 0, 0, 0.5);
         display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        display: none;
-      }
-
-      #question-overlay button {
-        margin-top: 10px;
+        height: 20%;
+        color: white;
+        font-size: 2rem;
       }
     </style>
   </head>
   <body>
-    <div id="video-container" max-width="480px">
+    <div class="video-wrapper">
       <video id="video" controls>
-        <source src="/vids/lams/1.mp4" type="video/mp4" />
+        <source src="/vids/lams/output.mp4" type="video/mp4" />
       </video>
-      <div id="question-overlay">
-        <p>What is the capital of France?</p>
-        <button onclick="submitAnswer()">Submit Answer</button>
-      </div>
+      <div class="overlay" id="overlay">Your Custom Overlay</div>
     </div>
+
     <script>
       const video = document.getElementById("video");
-      const questionOverlay = document.getElementById("question-overlay");
-      const pauseTime = 5; // Pause video at 5 seconds
+      const overlay = document.getElementById("overlay");
 
-      video.addEventListener("timeupdate", () => {
-        if (video.currentTime >= pauseTime) {
-          video.pause();
-          questionOverlay.style.display = "flex";
-        }
+      // Hide the overlay initially
+      overlay.style.display = "none";
+
+      // Show the overlay when the video is paused
+      video.addEventListener("pause", () => {
+        overlay.style.display = "flex";
       });
 
-      function submitAnswer() {
-        // You can add logic here to check the user's answer
-        questionOverlay.style.display = "none";
-        video.play();
-      }
+      // Hide the overlay when the video is played
+      video.addEventListener("play", () => {
+        overlay.style.display = "none";
+      });
     </script>
   </body>
 </html>

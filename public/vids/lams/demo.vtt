@@ -1,0 +1,56 @@
+WEBVTT
+
+00:00:00.000 --> 00:04:20.000
+{
+  "type": "solution",
+  "title": "1303 V-Series เล่ม 3",
+  "pageNo": "022",
+  "problemNo": "007"
+}
+
+00:02:00.000 --> 00:02:20.000
+{
+  "type": "popup",
+  "title": "ตัวอย่าง Popup ระหว่าง video",
+  "text": "ตัวอย่างการนำไปใช้ เช่น สามารถใช้เมื่อต้องการเพิ่ม note ให้นักเรียนโดยที่ไม่ต้องไปแก้ไขที่ตัว video"
+}
+
+00:04:20.000 --> 00:04:20.100
+{
+  "type": "transition",
+  "pauseDuration": 50000,
+  "pageNo": "023",
+  "problemNo": "008"
+}
+
+00:04:20.100 --> 00:09:02.000
+{
+  "type": "solution",
+  "title": "1303 V-Series เล่ม 3",
+  "pageNo": "023",
+  "problemNo": "008"
+}
+
+00:09:02.100 --> 00:14:22.000
+{
+  "type": "solution",
+  "title": "1303 V-Series เล่ม 3",
+  "pageNo": "024",
+  "problemNo": "009"
+}
+
+00:15:22.100 --> 00:27:13.000
+{
+  "type": "solution",
+  "title": "1303 V-Series เล่ม 3",
+  "pageNo": "025",
+  "problemNo": "010"
+}
+
+00:27:13.100 --> 00:99:00.000
+{
+  "type": "solution",
+  "title": "1303 V-Series เล่ม 3",
+  "pageNo": "026",
+  "problemNo": "011"
+}

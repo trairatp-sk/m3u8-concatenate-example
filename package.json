@@ -26,5 +26,8 @@
     "remotion": "^3.3.79",
     "typescript": "4.9.5",
     "video.js": "^8.0.4"
+  },
+  "devDependencies": {
+    "sass": "^1.61.0"
   }
 }
