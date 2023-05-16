@@ -18,7 +18,7 @@ WEBVTT
 00:04:20.000 --> 00:04:20.100
 {
   "type": "transition",
-  "pauseDuration": 50000,
+  "pauseDuration": 2000,
   "pageNo": "023",
   "problemNo": "008"
 }
@@ -39,7 +39,7 @@ WEBVTT
   "problemNo": "009"
 }
 
-00:15:22.100 --> 00:27:13.000
+00:14:22.100 --> 00:27:13.000
 {
   "type": "solution",
   "title": "1303 V-Series เล่ม 3",

@@ -1,15 +1,11 @@
-import { Inter } from "@next/font/google";
-import VideoPlayerWithOverlay from "@/components/VideoPlayerWithOverlay";
-
-const inter = Inter({ subsets: ["latin"] });
+import { useState } from "react";
+import VJSPlayerWithOverlay from "components/VJSPlayerWithOverlay";
 
 export default function VideoWithOverlay() {
   return (
-    <div className="video-with-overlay-container">
-      <VideoPlayerWithOverlay
-        videoSrc="/vids/lams/output.mp4"
-        vttSrc="/overlay.vtt"
-      ></VideoPlayerWithOverlay>
-    </div>
+    <VJSPlayerWithOverlay
+      videoSrc="/vids/lams/output.mp4"
+      vttSrc="/overlay.vtt"
+    ></VJSPlayerWithOverlay>
   );
 }
