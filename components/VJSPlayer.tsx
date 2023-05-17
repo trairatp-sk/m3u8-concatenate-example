@@ -57,7 +57,8 @@ export const VJSPlayer = (props: Props) => {
   return (
     <div data-vjs-player>
       <div style={{ ...fullSize }} ref={videoRef}>
-        {props.children}
+        {/* <div style={{ ...fullSize }}></div> */}
+        {/* {props.children} */}
       </div>
     </div>
   );

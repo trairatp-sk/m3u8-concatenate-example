@@ -1,11 +1,11 @@
 import { useState } from "react";
-import VJSPlayerWithOverlay from "components/VJSPlayerWithOverlay";
+import VideoPlayerWithOverlay from "components/VideoPlayerWithOverlay";
 
 export default function VideoWithOverlay() {
   return (
-    <VJSPlayerWithOverlay
+    <VideoPlayerWithOverlay
       videoSrc="/vids/lams/output.mp4"
       vttSrc="/overlay.vtt"
-    ></VJSPlayerWithOverlay>
+    ></VideoPlayerWithOverlay>
   );
 }

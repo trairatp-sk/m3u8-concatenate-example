@@ -1,5 +1,109 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Hls from "hls.js";
+
+const formatTime = (input: number) => {
+  const minutes = Math.floor(input / 60);
+  const remainingSeconds = Math.floor(input % 60);
+  const formattedMinutes = String(minutes).padStart(2, "0");
+  const formattedSeconds = String(remainingSeconds).padStart(2, "0");
+  return `${formattedMinutes}:${formattedSeconds}`;
+};
+
+const VideoInfoHeader = ({
+  activeChapter,
+  seekTo,
+  isActive,
+}: {
+  isActive: boolean;
+  activeChapter?: string;
+  seekTo(a: number): void;
+}) => {
+  const chapters = ["007", "008", "009", "010", "011"];
+  const timestamps = [0, 260, 542, 862, 1633];
+  return (
+    <div className={`video-info-header ${isActive ? "" : "hide"}`}>
+      <div className="title">เฉลยการบ้าน ความถี่เชิงมุมของการเคลื่อนที่</div>
+      <div className="chapter-container">
+        <div className="chapter-info">กำลังเล่น</div>
+        {chapters.map((chapter, idx) => (
+          <div
+            key={chapter}
+            className={`chapter-chip ${
+              activeChapter === chapter ? "active" : ""
+            }`}
+            onClick={() => {
+              seekTo(timestamps[idx]);
+            }}
+          >
+            Solution ข้อ {+chapter}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const VideoController = ({
+  isActive,
+  currentTime,
+  totalDurationSec,
+  seekTo,
+}: {
+  isActive: boolean;
+  currentTime: number;
+  totalDurationSec: number;
+  seekTo(a: number): void;
+}) => {
+  const progressPercentage = (currentTime / totalDurationSec) * 100;
+  return (
+    <div className={`video-controller ${isActive ? "" : "hide"}`}>
+      <div className="progress-container">
+        <div className="timestamp">{formatTime(currentTime)}</div>
+        <div
+          className="progress-bar"
+          onClick={(e) => {
+            console.log(
+              e.clientX,
+              e.clientY,
+              (e.target as any).getBoundingClientRect()
+            );
+            const rect = (e.target as any).getBoundingClientRect();
+            // const width = e.
+            const x = e.clientX - rect.left; //x position within the element.
+            const y = e.clientY - rect.top; //y position within the element.
+            const percentage = console.log(
+              "Left? : " + x + " ; Top? : " + y + "."
+            );
+          }}
+        >
+          <div className="left" style={{ flex: progressPercentage }}>
+            {/* <div className="cursor"></div> */}
+          </div>
+          <div
+            className="right"
+            style={{ flex: 100 - progressPercentage }}
+          ></div>
+        </div>
+        <div className="timestamp">{formatTime(totalDurationSec)}</div>
+      </div>
+      <div className="control-container">
+        <div className="play-pause-seek">
+          <img
+            className="control"
+            src="/icons/back-10s.svg"
+            onClick={() => seekTo(currentTime - 10)}
+          ></img>
+          <img className="control" src="/icons/pause.svg"></img>
+          <img
+            className="control"
+            src="/icons/forward-10s.svg"
+            onClick={() => seekTo(currentTime + 10)}
+          ></img>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const HeaderOverlay = ({
   title,
@@ -14,7 +118,7 @@ const HeaderOverlay = ({
     <div className="overlay-container" id="overlay">
       <img className="header-bg" src="/phy-overlay-01.png"></img>
       <div className="title">{title}</div>
-      <div className="problem-no">ข้อที่{problemNo}</div>
+      <div className="problem-no">ข้อที่ {problemNo}</div>
       <div className="page-no">หน้าที่ {pageNo}</div>
     </div>
   );
@@ -66,13 +170,14 @@ const VideoPlayerWithOverlay = ({
     Array<Record<string, string>>
   >([]);
   const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
+  const [activeChapter, setActiveChapter] = useState<string>();
 
   const [activePopUpCue, setActivePopUpCue] =
     React.useState<Record<string, string>>();
 
   const activeCue = activeCues[0];
 
-  console.log("activeCue", { activeCue });
+  // console.log("activeCue", { activeCue });
 
   React.useEffect(() => {
     if (!pausedUntil) return;
@@ -125,12 +230,58 @@ const VideoPlayerWithOverlay = ({
         }
       }
       setActiveCues(textCues);
+      const firstCue = textCues[0];
+      if (firstCue) {
+        setActiveChapter(firstCue.problemNo ?? undefined);
+      }
     };
     textTrack.addEventListener("cuechange", handleCueChange);
     return () => {
       textTrack.removeEventListener("cuechange", handleCueChange);
     };
   }, [trackRef]);
+
+  const [isControlActive, setIsControlActive] = useState(true);
+  const timeoutIdRef = React.useRef<any>(null);
+
+  const activateControl = useCallback(
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, delay = 3000) => {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
+      setIsControlActive(true);
+      timeoutIdRef.current = setTimeout(() => {
+        setIsControlActive(false);
+        timeoutIdRef.current = null;
+      }, delay);
+      e.stopPropagation();
+    },
+    [setIsControlActive]
+  );
+
+  const seekTo = useCallback((seekToSec: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = seekToSec;
+    }
+  }, []);
+
+  const [currentTime, setCurrentTime] = useState(0);
+  const [totalDurationSec, setTotalDurationSec] = useState(1855);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      const onTimeUpdate = (e: Event) => {
+        setCurrentTime(videoRef.current?.currentTime ?? 0);
+      };
+      videoRef.current.addEventListener("timeupdate", onTimeUpdate);
+      return () => {
+        videoRef.current?.removeEventListener("timeupdate", onTimeUpdate);
+      };
+    }
+  }, [videoRef.current]);
+
+  // console.log({ currentTime });
 
   // React.useEffect(() => {
   //   const video = videoRef.current;
@@ -162,35 +313,52 @@ const VideoPlayerWithOverlay = ({
   // }, [src, videoRef]);
 
   return (
-    <div className="video-wrapper">
-      <video ref={videoRef} muted autoPlay controls>
-        <source ref={videoSrcRef} src={videoSrc} type="video/mp4" />
-        <track
-          default
-          kind="metadata"
-          src={vttSrc}
-          label="English"
-          ref={trackRef}
-        />
-      </video>
-      {activeCue?.type === "solution" && (
-        <HeaderOverlay
-          title={activeCue.title}
-          pageNo={activeCue.pageNo}
-          problemNo={activeCue.problemNo}
-        />
-      )}
-      {activePopUpCue && (
-        <PopupOverlay title={activePopUpCue.title} text={activePopUpCue.text} />
-      )}
-      {transitionCue && (
-        <TransitionOverlay
-          title={transitionCue.title}
-          pageNo={transitionCue.pageNo}
-          problemNo={transitionCue.problemNo}
-          timeLeftSec={timeLeftSec}
-        />
-      )}
+    <div className="video-with-overlay-container" onMouseOver={activateControl}>
+      <div className="video-wrapper">
+        <video ref={videoRef} muted autoPlay>
+          <source ref={videoSrcRef} src={videoSrc} type="video/mp4" />
+          <track
+            default
+            kind="metadata"
+            src={vttSrc}
+            label="English"
+            ref={trackRef}
+          />
+          <div>test</div>
+        </video>
+        {activeCue?.type === "solution" && (
+          <HeaderOverlay
+            title={activeCue.title}
+            pageNo={activeCue.pageNo}
+            problemNo={activeCue.problemNo}
+          />
+        )}
+        {activePopUpCue && (
+          <PopupOverlay
+            title={activePopUpCue.title}
+            text={activePopUpCue.text}
+          />
+        )}
+        {transitionCue && (
+          <TransitionOverlay
+            title={transitionCue.title}
+            pageNo={transitionCue.pageNo}
+            problemNo={transitionCue.problemNo}
+            timeLeftSec={timeLeftSec}
+          />
+        )}
+      </div>
+      <VideoInfoHeader
+        isActive={isControlActive}
+        activeChapter={activeChapter}
+        seekTo={seekTo}
+      />
+      <VideoController
+        isActive={isControlActive}
+        currentTime={currentTime}
+        totalDurationSec={totalDurationSec}
+        seekTo={seekTo}
+      />
     </div>
   );
 };

@@ -5,9 +5,41 @@ import type Player from "video.js/dist/types/player";
 
 import VJSPlayer from "./VJSPlayer";
 
-const VideoControl = ({
+const VideoInfoHeader = ({
   activeChapter,
   setSeekToSec,
+  isActive,
+}: {
+  isActive: boolean;
+  activeChapter?: string;
+  setSeekToSec(a: number): void;
+}) => {
+  const chapters = ["007", "008", "009", "010", "011"];
+  const timestamps = [0, 260, 542, 862, 1633];
+  return (
+    <div className={`video-info-header ${isActive ? "" : "hide"}`}>
+      <div className="title">เฉลยการบ้าน ความถี่เชิงมุมของการเคลื่อนที่</div>
+      <div className="chapter-container">
+        <div className="chapter-info">กำลังเล่น</div>
+        {chapters.map((chapter, idx) => (
+          <div
+            key={chapter}
+            className={`chapter-chip ${
+              activeChapter === chapter ? "active" : ""
+            }`}
+            onClick={() => {
+              setSeekToSec(timestamps[idx]);
+            }}
+          >
+            Solution ข้อ {+chapter}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const VideoControl = ({
   isActive,
 }: {
   isActive: boolean;
@@ -129,11 +161,11 @@ const VJSPlayerWithOverlay = ({
         options={videoJsOptions}
         onReady={handlePlayerReady}
       ></VJSPlayer>
-      <VideoControl
+      <VideoInfoHeader
         isActive={isControlActive}
         activeChapter={activeChapter}
         setSeekToSec={setSeekToSec}
-      ></VideoControl>
+      ></VideoInfoHeader>
     </div>
   );
 };
