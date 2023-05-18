@@ -1,7 +1,7 @@
 body {
   margin: 0;
   background-color: black;
-  font-family: "Noto Sans";
+  font-family: "Noto Sans Thai", sans-serif;
 }
 
 #__next {
@@ -195,6 +195,7 @@ body {
       align-items: center;
 
       .progress-bar {
+        position: relative;
         border-radius: 4px;
         background-color: white;
         flex: 1;
@@ -207,6 +208,7 @@ body {
           position: relative;
           border-radius: 4px;
           background-color: rgb(0, 116, 255);
+          pointer-events: none;
           .cursor {
             position: absolute;
             right: 0px;
@@ -218,6 +220,23 @@ body {
         }
         .right {
           border-radius: 4px;
+          pointer-events: none;
+        }
+        .hover-preview {
+          position: absolute;
+          width: 8px;
+          height: 100%;
+          background-color: #cccccc;
+          pointer-events: none;
+          transform: translateX(-50%);
+          .preview-timestamp {
+            position: absolute;
+            background-color: black;
+            color: white;
+            transform: translate(-50%, -200%);
+            padding: 4px 8px;
+            border-radius: 2px;
+          }
         }
       }
 

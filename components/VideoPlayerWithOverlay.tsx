@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 
 const formatTime = (input: number) => {
@@ -43,37 +43,77 @@ const VideoInfoHeader = ({
   );
 };
 
+const getEventOffsetXPercentageFromMouseEvent = (
+  elementRef: React.MutableRefObject<HTMLDivElement | null>,
+  event: React.MouseEvent<HTMLDivElement, MouseEvent>
+): number | null => {
+  if (!elementRef.current) {
+    return null;
+  }
+  const ne = event.nativeEvent;
+  const progressBar = elementRef.current;
+  const percentage = (ne.offsetX / progressBar.clientWidth) * 100;
+  console.log({
+    x: ne.offsetX,
+    y: ne.offsetY,
+    width: progressBar.clientWidth,
+    height: progressBar.clientHeight,
+    percentage,
+  });
+  return percentage;
+};
+
 const VideoController = ({
   isActive,
   currentTime,
   totalDurationSec,
   seekTo,
+  isPlaying,
+  play,
+  pause,
 }: {
   isActive: boolean;
   currentTime: number;
   totalDurationSec: number;
   seekTo(a: number): void;
+  play(): void;
+  pause(): void;
+  isPlaying: boolean;
 }) => {
   const progressPercentage = (currentTime / totalDurationSec) * 100;
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const [hoverPercentage, setHoverPercentage] = useState<number | null>(null);
+  const hoverTimestamp =
+    hoverPercentage !== null
+      ? formatTime((hoverPercentage * totalDurationSec) / 100)
+      : null;
   return (
     <div className={`video-controller ${isActive ? "" : "hide"}`}>
       <div className="progress-container">
         <div className="timestamp">{formatTime(currentTime)}</div>
         <div
+          ref={progressBarRef}
           className="progress-bar"
           onClick={(e) => {
-            console.log(
-              e.clientX,
-              e.clientY,
-              (e.target as any).getBoundingClientRect()
+            const percentage = getEventOffsetXPercentageFromMouseEvent(
+              progressBarRef,
+              e
             );
-            const rect = (e.target as any).getBoundingClientRect();
-            // const width = e.
-            const x = e.clientX - rect.left; //x position within the element.
-            const y = e.clientY - rect.top; //y position within the element.
-            const percentage = console.log(
-              "Left? : " + x + " ; Top? : " + y + "."
+            if (!percentage) {
+              return;
+            }
+            console.log((totalDurationSec * percentage) / 100);
+            seekTo((totalDurationSec * percentage) / 100);
+          }}
+          onMouseOut={() => {
+            setHoverPercentage(null);
+          }}
+          onMouseMove={(e) => {
+            const percentage = getEventOffsetXPercentageFromMouseEvent(
+              progressBarRef,
+              e
             );
+            setHoverPercentage(percentage);
           }}
         >
           <div className="left" style={{ flex: progressPercentage }}>
@@ -83,6 +123,14 @@ const VideoController = ({
             className="right"
             style={{ flex: 100 - progressPercentage }}
           ></div>
+          {hoverPercentage !== null && (
+            <div
+              className="hover-preview"
+              style={{ left: `${hoverPercentage}%` }}
+            >
+              <div className="preview-timestamp">{hoverTimestamp}</div>
+            </div>
+          )}
         </div>
         <div className="timestamp">{formatTime(totalDurationSec)}</div>
       </div>
@@ -93,7 +141,19 @@ const VideoController = ({
             src="/icons/back-10s.svg"
             onClick={() => seekTo(currentTime - 10)}
           ></img>
-          <img className="control" src="/icons/pause.svg"></img>
+          {isPlaying ? (
+            <img
+              className="control"
+              src="/icons/pause.svg"
+              onClick={() => pause()}
+            ></img>
+          ) : (
+            <img
+              className="control"
+              src="/icons/play.svg"
+              onClick={() => play()}
+            ></img>
+          )}
           <img
             className="control"
             src="/icons/forward-10s.svg"
@@ -267,6 +327,7 @@ const VideoPlayerWithOverlay = ({
   }, []);
 
   const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [totalDurationSec, setTotalDurationSec] = useState(1855);
 
   useEffect(() => {
@@ -274,7 +335,15 @@ const VideoPlayerWithOverlay = ({
       const onTimeUpdate = (e: Event) => {
         setCurrentTime(videoRef.current?.currentTime ?? 0);
       };
+      const onPlay = (e: Event) => {
+        setIsPlaying(true);
+      };
+      const onPause = (e: Event) => {
+        setIsPlaying(false);
+      };
       videoRef.current.addEventListener("timeupdate", onTimeUpdate);
+      videoRef.current.addEventListener("play", onPlay);
+      videoRef.current.addEventListener("pause", onPause);
       return () => {
         videoRef.current?.removeEventListener("timeupdate", onTimeUpdate);
       };
@@ -358,6 +427,13 @@ const VideoPlayerWithOverlay = ({
         currentTime={currentTime}
         totalDurationSec={totalDurationSec}
         seekTo={seekTo}
+        isPlaying={isPlaying}
+        play={() => {
+          videoRef.current?.play();
+        }}
+        pause={() => {
+          videoRef.current?.pause();
+        }}
       />
     </div>
   );
