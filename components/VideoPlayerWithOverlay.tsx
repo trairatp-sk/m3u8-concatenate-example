@@ -225,9 +225,6 @@ const VideoPlayerWithOverlay = ({
   const [pausedUntil, setPausedUntil] = React.useState<Date>();
   const [timeLeftSec, setTimeLeftSec] = React.useState<number>(0);
   // const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
-  const [src, setSrc] = React.useState(
-    "https://pub-a745e3b4cca7460d96493738dbfc72f8.r2.dev/demo.m3u8"
-  );
   const [transitionCue, setTransitionCue] =
     React.useState<Record<string, string>>();
   const [currentTime, setCurrentTime] = useState(0);
@@ -327,12 +324,12 @@ const VideoPlayerWithOverlay = ({
 
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       // This will run in safari, where HLS is supported natively
-      video.src = src;
+      video.src = videoSrc;
     } else if (Hls.isSupported()) {
       console.log("Hls is supported");
       // This will run in all other modern browsers
       hls = new Hls();
-      hls.loadSource(src);
+      hls.loadSource(videoSrc);
       hls.attachMedia(video);
     } else {
       console.error(
@@ -345,7 +342,7 @@ const VideoPlayerWithOverlay = ({
         hls.destroy();
       }
     };
-  }, [src, videoRef, attachEventListeners]);
+  }, [videoSrc, videoRef, attachEventListeners]);
 
   return (
     <div className="video-with-overlay-container" onMouseOver={activateControl}>
