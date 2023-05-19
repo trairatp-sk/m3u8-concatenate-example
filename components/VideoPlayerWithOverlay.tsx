@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import { useActiveCues } from "@/hooks/useVtt";
 
 const formatTime = (input: number) => {
   const minutes = Math.floor(input / 60);
@@ -53,13 +54,13 @@ const getEventOffsetXPercentageFromMouseEvent = (
   const ne = event.nativeEvent;
   const progressBar = elementRef.current;
   const percentage = (ne.offsetX / progressBar.clientWidth) * 100;
-  console.log({
-    x: ne.offsetX,
-    y: ne.offsetY,
-    width: progressBar.clientWidth,
-    height: progressBar.clientHeight,
-    percentage,
-  });
+  // console.log({
+  //   x: ne.offsetX,
+  //   y: ne.offsetY,
+  //   width: progressBar.clientWidth,
+  //   height: progressBar.clientHeight,
+  //   percentage,
+  // });
   return percentage;
 };
 
@@ -102,7 +103,7 @@ const VideoController = ({
             if (!percentage) {
               return;
             }
-            console.log((totalDurationSec * percentage) / 100);
+            // console.log((totalDurationSec * percentage) / 100);
             seekTo((totalDurationSec * percentage) / 100);
           }}
           onMouseOut={() => {
@@ -224,18 +225,16 @@ const VideoPlayerWithOverlay = ({
   // const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
   const [pausedUntil, setPausedUntil] = React.useState<Date>();
   const [timeLeftSec, setTimeLeftSec] = React.useState<number>(0);
+  const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
   const [transitionCue, setTransitionCue] =
     React.useState<Record<string, string>>();
-  const [activeCues, setActiveCues] = React.useState<
-    Array<Record<string, string>>
-  >([]);
-  const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
-  const [activeChapter, setActiveChapter] = useState<string>();
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [totalDurationSec, setTotalDurationSec] = useState(1855);
+  const { activeCue, activeCues, activeChapter, activePopUpCue } =
+    useActiveCues("/overlay.vtt", currentTime);
 
-  const [activePopUpCue, setActivePopUpCue] =
-    React.useState<Record<string, string>>();
-
-  const activeCue = activeCues[0];
+  // console.log(webvtt);
 
   // console.log("activeCue", { activeCue });
 
@@ -266,41 +265,6 @@ const VideoPlayerWithOverlay = ({
     setPausedUntil(new Date(Date.now() + pauseDuration));
   };
 
-  React.useEffect(() => {
-    if (!trackRef.current) return;
-    const track = trackRef.current;
-    const textTrack = track.track;
-    const handleCueChange = (event: Event) => {
-      console.log(event);
-      if (!event.currentTarget || !(event.currentTarget instanceof TextTrack)) {
-        return;
-      }
-      const textTrack: TextTrack = event.currentTarget;
-      const activeCues = Array.from(textTrack.activeCues ?? []);
-      setActivePopUpCue(undefined);
-      const textCues = [];
-      for (const cue of activeCues) {
-        const cueText = JSON.parse((cue as any).text);
-        if (cueText.type === "transition") {
-          handleTransitionCue(cueText);
-        } else if (cueText.type === "popup") {
-          setActivePopUpCue(cueText);
-        } else {
-          textCues.push(cueText);
-        }
-      }
-      setActiveCues(textCues);
-      const firstCue = textCues[0];
-      if (firstCue) {
-        setActiveChapter(firstCue.problemNo ?? undefined);
-      }
-    };
-    textTrack.addEventListener("cuechange", handleCueChange);
-    return () => {
-      textTrack.removeEventListener("cuechange", handleCueChange);
-    };
-  }, [trackRef]);
-
   const [isControlActive, setIsControlActive] = useState(true);
   const timeoutIdRef = React.useRef<any>(null);
 
@@ -326,14 +290,11 @@ const VideoPlayerWithOverlay = ({
     }
   }, []);
 
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [totalDurationSec, setTotalDurationSec] = useState(1855);
-
-  useEffect(() => {
-    if (videoRef.current) {
+  const attachEventListeners = useCallback(() => {
+    const video = videoRef.current;
+    if (video) {
       const onTimeUpdate = (e: Event) => {
-        setCurrentTime(videoRef.current?.currentTime ?? 0);
+        setCurrentTime(video?.currentTime ?? 0);
       };
       const onPlay = (e: Event) => {
         setIsPlaying(true);
@@ -341,45 +302,47 @@ const VideoPlayerWithOverlay = ({
       const onPause = (e: Event) => {
         setIsPlaying(false);
       };
-      videoRef.current.addEventListener("timeupdate", onTimeUpdate);
-      videoRef.current.addEventListener("play", onPlay);
-      videoRef.current.addEventListener("pause", onPause);
+      video.addEventListener("timeupdate", onTimeUpdate);
+      video.addEventListener("play", onPlay);
+      video.addEventListener("pause", onPause);
       return () => {
-        videoRef.current?.removeEventListener("timeupdate", onTimeUpdate);
+        video.removeEventListener("timeupdate", onTimeUpdate);
       };
     }
-  }, [videoRef.current]);
+  }, []);
 
-  // console.log({ currentTime });
+  useEffect(() => {
+    attachEventListeners();
+  }, [attachEventListeners]);
 
-  // React.useEffect(() => {
-  //   const video = videoRef.current;
-  //   if (!video) return;
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
-  //   video.controls = true;
-  //   let hls: Hls;
+    // video.controls = true;
+    let hls: Hls;
 
-  //   if (video.canPlayType("application/vnd.apple.mpegurl")) {
-  //     // This will run in safari, where HLS is supported natively
-  //     video.src = src;
-  //   } else if (Hls.isSupported()) {
-  //     console.log("Hls is supported");
-  //     // This will run in all other modern browsers
-  //     hls = new Hls();
-  //     hls.loadSource(src);
-  //     hls.attachMedia(video);
-  //   } else {
-  //     console.error(
-  //       "This is an old browser that does not support MSE https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API"
-  //     );
-  //   }
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // This will run in safari, where HLS is supported natively
+      video.src = src;
+    } else if (Hls.isSupported()) {
+      console.log("Hls is supported");
+      // This will run in all other modern browsers
+      hls = new Hls();
+      hls.loadSource(src);
+      hls.attachMedia(video);
+    } else {
+      console.error(
+        "This is an old browser that does not support MSE https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API"
+      );
+    }
 
-  //   return () => {
-  //     if (hls) {
-  //       hls.destroy();
-  //     }
-  //   };
-  // }, [src, videoRef]);
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [src, videoRef, attachEventListeners]);
 
   return (
     <div className="video-with-overlay-container" onMouseOver={activateControl}>
@@ -390,22 +353,22 @@ const VideoPlayerWithOverlay = ({
             default
             kind="metadata"
             src={vttSrc}
-            label="English"
+            // label="English"
             ref={trackRef}
           />
           <div>test</div>
         </video>
-        {activeCue?.type === "solution" && (
+        {activeCue?.data.type === "solution" && (
           <HeaderOverlay
-            title={activeCue.title}
-            pageNo={activeCue.pageNo}
-            problemNo={activeCue.problemNo}
+            title={activeCue.data.title}
+            pageNo={activeCue.data.pageNo}
+            problemNo={activeCue.data.problemNo}
           />
         )}
         {activePopUpCue && (
           <PopupOverlay
-            title={activePopUpCue.title}
-            text={activePopUpCue.text}
+            title={activePopUpCue.data.title}
+            text={activePopUpCue.data.text}
           />
         )}
         {transitionCue && (

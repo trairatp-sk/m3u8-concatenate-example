@@ -15,6 +15,7 @@
     "@types/node": "18.13.0",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
+    "axios": "^1.4.0",
     "eslint": "8.33.0",
     "eslint-config-next": "13.1.6",
     "hls-parser": "^0.10.6",
@@ -25,7 +26,8 @@
     "recoil": "^0.7.7",
     "remotion": "^3.3.79",
     "typescript": "4.9.5",
-    "video.js": "^8.0.4"
+    "video.js": "^8.0.4",
+    "webvtt-parser": "^2.2.0"
   },
   "devDependencies": {
     "sass": "^1.61.0"
