@@ -302,6 +302,7 @@ const VideoPlayerWithOverlay = ({
       const onPause = (e: Event) => {
         setIsPlaying(false);
       };
+      console.log("duration", video.duration);
       video.addEventListener("timeupdate", onTimeUpdate);
       video.addEventListener("play", onPlay);
       video.addEventListener("pause", onPause);

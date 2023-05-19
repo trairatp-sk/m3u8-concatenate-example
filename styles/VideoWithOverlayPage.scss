@@ -24,8 +24,9 @@ body {
   }
 
   .video-wrapper {
+    width: 100%;
     position: relative;
-    display: inline-block;
+    // display: inline-block;
 
     .overlay-container {
       // display: flex;
