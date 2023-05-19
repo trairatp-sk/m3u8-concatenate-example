@@ -222,10 +222,12 @@ const VideoPlayerWithOverlay = ({
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const videoSrcRef = React.useRef<HTMLSourceElement>(null);
   const trackRef = React.useRef<HTMLTrackElement>(null);
-  // const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
   const [pausedUntil, setPausedUntil] = React.useState<Date>();
   const [timeLeftSec, setTimeLeftSec] = React.useState<number>(0);
-  const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
+  // const [src, setSrc] = React.useState("/vids/lams/demo.m3u8");
+  const [src, setSrc] = React.useState(
+    "https://pub-a745e3b4cca7460d96493738dbfc72f8.r2.dev/demo.m3u8"
+  );
   const [transitionCue, setTransitionCue] =
     React.useState<Record<string, string>>();
   const [currentTime, setCurrentTime] = useState(0);
