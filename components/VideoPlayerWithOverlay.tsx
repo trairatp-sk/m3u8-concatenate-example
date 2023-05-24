@@ -66,13 +66,6 @@ const getEventOffsetXPercentageFromMouseEvent = (
   const ne = event.nativeEvent;
   const progressBar = elementRef.current;
   const percentage = (ne.offsetX / progressBar.clientWidth) * 100;
-  // console.log({
-  //   x: ne.offsetX,
-  //   y: ne.offsetY,
-  //   width: progressBar.clientWidth,
-  //   height: progressBar.clientHeight,
-  //   percentage,
-  // });
   return percentage;
 };
 
