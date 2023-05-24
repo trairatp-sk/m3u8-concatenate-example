@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { useActiveCues } from "@/hooks/useVtt";
+import { Spinner } from "./Spinner";
 
 type VideoResolutionOption = {
   name: string;
@@ -240,6 +241,7 @@ const VideoPlayerWithOverlay = ({
   const [availableResolutions, setAvailableResolutions] = useState<
     VideoResolutionOption[]
   >([]);
+  const [isWaiting, setIsWaiting] = useState(false);
 
   // console.log(webvtt);
 
@@ -305,20 +307,28 @@ const VideoPlayerWithOverlay = ({
       };
       const onPlay = (e: Event) => {
         setIsPlaying(true);
+        setIsWaiting(false);
       };
       const onPause = (e: Event) => {
         setIsPlaying(false);
+      };
+      const onWaiting = (e: Event) => {
+        setIsWaiting(true);
       };
       console.log("duration", video.duration);
       video.addEventListener("loadedmetadata", () => {
         console.log("duration", video.duration);
         setTotalDurationSec(video.duration);
       });
+      video.addEventListener("waiting", onWaiting);
       video.addEventListener("timeupdate", onTimeUpdate);
       video.addEventListener("play", onPlay);
       video.addEventListener("pause", onPause);
       return () => {
+        video.removeEventListener("waiting", onWaiting);
         video.removeEventListener("timeupdate", onTimeUpdate);
+        video.removeEventListener("play", onPlay);
+        video.removeEventListener("pause", onPause);
         setTotalDurationSec(NaN);
       };
     }
@@ -370,7 +380,7 @@ const VideoPlayerWithOverlay = ({
   }, [videoSrc, videoRef, attachEventListeners]);
 
   return (
-    <div className="video-with-overlay-container" onMouseOver={activateControl}>
+    <div className="video-with-overlay-container" onMouseMove={activateControl}>
       <div className="video-wrapper">
         <video ref={videoRef} muted autoPlay>
           <source ref={videoSrcRef} type="video/mp4" />
@@ -405,6 +415,7 @@ const VideoPlayerWithOverlay = ({
           />
         )}
       </div>
+      {isWaiting && <Spinner></Spinner>}
       <VideoInfoHeader
         isActive={isControlActive}
         activeChapter={activeChapter}

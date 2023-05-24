@@ -3,7 +3,7 @@ import VideoPlayerWithOverlay from "components/VideoPlayerWithOverlay";
 export default function VideoWithOverlay() {
   return (
     <VideoPlayerWithOverlay
-      videoSrc="https://pub-a745e3b4cca7460d96493738dbfc72f8.r2.dev/demo.m3u8"
+      videoSrc="https://storage.googleapis.com/lc-smooth-playlist-poc/usability-test-2/main.m3u8"
       vttSrc="/overlay.vtt"
     ></VideoPlayerWithOverlay>
   );
