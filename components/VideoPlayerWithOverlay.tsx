@@ -2,7 +2,19 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { useActiveCues } from "@/hooks/useVtt";
 
+type VideoResolutionOption = {
+  name: string;
+  width: number;
+  height: number;
+  bitrate: number;
+  maxBitrate: number;
+  realBitrate: number;
+};
+
 const formatTime = (input: number) => {
+  if (!input || Number.isNaN(input)) {
+    return "--:--";
+  }
   const minutes = Math.floor(input / 60);
   const remainingSeconds = Math.floor(input % 60);
   const formattedMinutes = String(minutes).padStart(2, "0");
@@ -229,9 +241,12 @@ const VideoPlayerWithOverlay = ({
     React.useState<Record<string, string>>();
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [totalDurationSec, setTotalDurationSec] = useState(1855);
+  const [totalDurationSec, setTotalDurationSec] = useState<number>(NaN);
   const { activeCue, activeCues, activeChapter, activePopUpCue } =
     useActiveCues("/overlay.vtt", currentTime);
+  const [availableResolutions, setAvailableResolutions] = useState<
+    VideoResolutionOption[]
+  >([]);
 
   // console.log(webvtt);
 
@@ -302,11 +317,16 @@ const VideoPlayerWithOverlay = ({
         setIsPlaying(false);
       };
       console.log("duration", video.duration);
+      video.addEventListener("loadedmetadata", () => {
+        console.log("duration", video.duration);
+        setTotalDurationSec(video.duration);
+      });
       video.addEventListener("timeupdate", onTimeUpdate);
       video.addEventListener("play", onPlay);
       video.addEventListener("pause", onPause);
       return () => {
         video.removeEventListener("timeupdate", onTimeUpdate);
+        setTotalDurationSec(NaN);
       };
     }
   }, []);
@@ -329,6 +349,18 @@ const VideoPlayerWithOverlay = ({
       console.log("Hls is supported");
       // This will run in all other modern browsers
       hls = new Hls();
+      hls.on(Hls.Events.MANIFEST_LOADED, (event, data) => {
+        console.log("loaded");
+        const bitrates: VideoResolutionOption[] = hls.levels.map((level) => ({
+          name: `${level.width}x${level.height} (${level.bitrate})`,
+          bitrate: level.bitrate,
+          maxBitrate: level.maxBitrate,
+          realBitrate: level.realBitrate,
+          width: level.width,
+          height: level.height,
+        }));
+        setAvailableResolutions(bitrates);
+      });
       hls.loadSource(videoSrc);
       hls.attachMedia(video);
     } else {
