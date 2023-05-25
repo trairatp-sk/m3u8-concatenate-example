@@ -284,7 +284,7 @@ const VideoPlayerWithOverlay = ({
   const timeoutIdRef = React.useRef<any>(null);
 
   const activateControl = useCallback(
-    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, delay = 3000) => {
+    (e?: React.MouseEvent<HTMLDivElement, MouseEvent>, delay = 3000) => {
       if (timeoutIdRef.current) {
         clearTimeout(timeoutIdRef.current);
         timeoutIdRef.current = null;
@@ -294,10 +294,15 @@ const VideoPlayerWithOverlay = ({
         setIsControlActive(false);
         timeoutIdRef.current = null;
       }, delay);
-      e.stopPropagation();
+      e?.stopPropagation();
     },
-    [setIsControlActive]
+    []
   );
+
+  // effect to show control when chapter change
+  useEffect(() => {
+    activateControl();
+  }, [activateControl, activeChapter]);
 
   const seekTo = useCallback((seekToSec: number) => {
     if (videoRef.current) {
