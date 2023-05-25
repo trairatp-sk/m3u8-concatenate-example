@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { useActiveCues } from "@/hooks/useVtt";
+import { Cue, useActiveCues } from "@/hooks/useVtt";
 import { Spinner } from "./Spinner";
 
 type VideoResolutionOption = {
@@ -27,29 +27,29 @@ const VideoInfoHeader = ({
   activeChapter,
   seekTo,
   isActive,
+  chapters,
 }: {
   isActive: boolean;
   activeChapter?: string;
   seekTo(a: number): void;
+  chapters: Cue[];
 }) => {
-  const chapters = ["007", "008", "009", "010", "011"];
-  const timestamps = [0, 260, 542, 862, 1633];
   return (
     <div className={`video-info-header ${isActive ? "" : "hide"}`}>
       <div className="title">เฉลยการบ้าน ความถี่เชิงมุมของการเคลื่อนที่</div>
       <div className="chapter-container">
         <div className="chapter-info">กำลังเล่น</div>
-        {chapters.map((chapter, idx) => (
+        {chapters.map((chapter) => (
           <div
-            key={chapter}
+            key={chapter.data.chapter}
             className={`chapter-chip ${
-              activeChapter === chapter ? "active" : ""
+              activeChapter === chapter.data.chapter ? "active" : ""
             }`}
             onClick={() => {
-              seekTo(timestamps[idx]);
+              seekTo(chapter.startTime);
             }}
           >
-            Solution ข้อ {+chapter}
+            {chapter.data.chapter}
           </div>
         ))}
       </div>
@@ -183,7 +183,7 @@ const HeaderOverlay = ({
 }) => {
   return (
     <div className="overlay-container" id="overlay">
-      <img className="header-bg" src="/phy-overlay-01.png"></img>
+      <img className="header-bg" src="/phy-overlay-02.png"></img>
       <div className="title">{title}</div>
       <div className="problem-no">ข้อที่ {problemNo}</div>
       <div className="page-no">หน้าที่ {pageNo}</div>
@@ -236,8 +236,14 @@ const VideoPlayerWithOverlay = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [totalDurationSec, setTotalDurationSec] = useState<number>(NaN);
-  const { activeCue, activeCues, activeChapter, activePopUpCue } =
-    useActiveCues("/overlay.vtt", currentTime);
+  const {
+    activeCue,
+    activeCues,
+    activeChapter,
+    activePopUpCue,
+    activeOverlayCue,
+    chapters,
+  } = useActiveCues("/overlay.vtt", currentTime);
   const [availableResolutions, setAvailableResolutions] = useState<
     VideoResolutionOption[]
   >([]);
@@ -309,25 +315,28 @@ const VideoPlayerWithOverlay = ({
         setIsPlaying(true);
         setIsWaiting(false);
       };
+      const onPlaying = (e: Event) => {
+        setIsWaiting(false);
+      };
       const onPause = (e: Event) => {
         setIsPlaying(false);
       };
       const onWaiting = (e: Event) => {
         setIsWaiting(true);
       };
-      console.log("duration", video.duration);
       video.addEventListener("loadedmetadata", () => {
-        console.log("duration", video.duration);
         setTotalDurationSec(video.duration);
       });
       video.addEventListener("waiting", onWaiting);
       video.addEventListener("timeupdate", onTimeUpdate);
       video.addEventListener("play", onPlay);
+      video.addEventListener("playing", onPlaying);
       video.addEventListener("pause", onPause);
       return () => {
         video.removeEventListener("waiting", onWaiting);
         video.removeEventListener("timeupdate", onTimeUpdate);
         video.removeEventListener("play", onPlay);
+        video.removeEventListener("playing", onPlaying);
         video.removeEventListener("pause", onPause);
         setTotalDurationSec(NaN);
       };
@@ -353,7 +362,6 @@ const VideoPlayerWithOverlay = ({
       // This will run in all other modern browsers
       hls = new Hls();
       hls.on(Hls.Events.MANIFEST_LOADED, (event, data) => {
-        console.log("loaded");
         const bitrates: VideoResolutionOption[] = hls.levels.map((level) => ({
           name: `${level.width}x${level.height} (${level.bitrate})`,
           bitrate: level.bitrate,
@@ -393,7 +401,7 @@ const VideoPlayerWithOverlay = ({
           />
           <div>test</div>
         </video>
-        {activeCue?.data.type === "solution" && (
+        {activeOverlayCue && (
           <HeaderOverlay
             title={activeCue.data.title}
             pageNo={activeCue.data.pageNo}
@@ -417,6 +425,7 @@ const VideoPlayerWithOverlay = ({
       </div>
       {isWaiting && <Spinner></Spinner>}
       <VideoInfoHeader
+        chapters={chapters}
         isActive={isControlActive}
         activeChapter={activeChapter}
         seekTo={seekTo}

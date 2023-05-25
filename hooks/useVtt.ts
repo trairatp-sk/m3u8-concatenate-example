@@ -23,7 +23,7 @@ const useWebVTT = (url: string) => {
   return cues;
 };
 
-type Cue = {
+export type Cue = {
   startTime: number;
   endTime: number;
   data: Record<string, string>;
@@ -31,6 +31,7 @@ type Cue = {
 
 const useActiveCues = (url: string, currentTimestampSec: number) => {
   const [cues, setCues] = useState<Cue[]>([]);
+  const [chapters, setChapters] = useState<Cue[]>([]);
 
   useEffect(() => {
     const fetchAndParseWebVTT = async () => {
@@ -46,6 +47,7 @@ const useActiveCues = (url: string, currentTimestampSec: number) => {
           };
         });
         setCues(mappedCues);
+        setChapters(mappedCues.filter((cue) => cue.data.type === "overlay"));
       } catch (error) {
         console.error("Failed to fetch and parse WebVTT:", error);
       }
@@ -56,20 +58,23 @@ const useActiveCues = (url: string, currentTimestampSec: number) => {
 
   const activeCues = cues.filter(
     (cue) =>
-      cue.startTime <= currentTimestampSec && cue.endTime >= currentTimestampSec
+      cue.startTime <= currentTimestampSec && cue.endTime > currentTimestampSec
   );
 
   const activeOverlayCues = activeCues.filter(
-    (cue) => cue.data.type === "solution"
+    (cue) => cue.data.type === "overlay"
   );
   const activePopUpCue = activeCues.find((cue) => cue.data.type === "popup");
-  const activeChapter = activeOverlayCues[0]?.data.problemNo;
-
+  const activeChapter = activeOverlayCues[0]?.data.chapter;
+  console.log(activeOverlayCues);
   return {
+    activeOverlayCues,
+    activeOverlayCue: activeOverlayCues[0],
     activeCues,
     activePopUpCue,
     activeCue: activeCues[0],
     activeChapter,
+    chapters,
   };
 };
 

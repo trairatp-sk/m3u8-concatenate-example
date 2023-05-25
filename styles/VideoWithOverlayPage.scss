@@ -62,7 +62,6 @@ body {
         top: 10%;
         padding: 0em 1em;
         transform: translateX(-50%);
-        background-color: black;
       }
 
       .page-no {
@@ -161,7 +160,7 @@ body {
         border-radius: 8px;
         padding: 4px 8px;
         cursor: pointer;
-
+        white-space: nowrap;
         &.active {
           background: #309cdf;
         }
