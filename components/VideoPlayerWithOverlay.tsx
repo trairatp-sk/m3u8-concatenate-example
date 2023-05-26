@@ -395,7 +395,7 @@ const VideoPlayerWithOverlay = ({
   return (
     <div className="video-with-overlay-container" onMouseMove={activateControl}>
       <div className="video-wrapper">
-        <video ref={videoRef} muted autoPlay>
+        <video ref={videoRef} autoPlay>
           <source ref={videoSrcRef} type="video/mp4" />
           <track
             default
